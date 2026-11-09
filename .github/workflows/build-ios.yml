@@ -1,0 +1,81 @@
+name: Build iOS IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ipa:
+    runs-on: macos-26
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 下载游戏资源包（来自 Release: game-data）
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "请先在仓库 Release 里以 tag [game-data] 上传游戏包（game-code.tar / game-image.tar / game-audio.tar）"
+          gh release download game-data --pattern '*.tar' --dir game-data --clobber
+
+      - name: 解压游戏资源
+        run: |
+          mkdir -p game-dist
+          for t in game-data/*.tar; do
+            echo "解压 $t ..."
+            tar -xf "$t" -C game-dist
+          done
+          rm -rf game-data
+          echo "=== game-dist 内容 ==="
+          ls game-dist | head -30
+
+      - name: 注入 iOS preload 引导
+        run: node patches/patch-index.mjs game-dist
+
+      - name: 为 game.js 打 Capacitor 补丁（跳过 ServiceWorker 检查）
+        run: node patches/patch-game-js.mjs game-dist
+
+      - name: 安装依赖
+        working-directory: mobile
+        run: pnpm install --no-frozen-lockfile
+
+      - name: 构建 preload 并同步到 Xcode 工程
+        working-directory: mobile
+        run: pnpm sync:ios
+
+      - name: 无签名 Xcode archive
+        working-directory: mobile/native/ios
+        run: |
+          xcodebuild -version
+          xcodebuild archive \
+            -project App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -archivePath build/noname.xcarchive \
+            -destination generic/platform=iOS \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+      - name: 打包未签名 IPA
+        working-directory: mobile/native/ios/build
+        run: |
+          mkdir -p Payload
+          cp -R noname.xcarchive/Products/Applications/App.app Payload/
+          zip -qry noname-unsigned.ipa Payload
+          ls -lh noname-unsigned.ipa
+
+      - name: 上传 IPA 产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: noname-ios-unsigned-ipa
+          path: mobile/native/ios/build/noname-unsigned.ipa
+          compression-level: 0
+          retention-days: 14

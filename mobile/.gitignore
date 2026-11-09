@@ -1,0 +1,9 @@
+node_modules/
+.mobile-preload/
+native/ios/App/App/public/
+native/ios/App/App/capacitor.config.json
+native/ios/App/App/public/
+native/ios/build/
+*.ipa
+*.xcarchive
+.DS_Store

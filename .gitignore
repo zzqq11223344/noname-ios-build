@@ -1,0 +1,5 @@
+game-dist/
+staging-code/
+*.tar
+*.ipa
+*.zip

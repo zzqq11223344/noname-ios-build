@@ -1,0 +1,8 @@
+D:\Game\PC版无名杀\noname-1.10.17.4.1\image
+D:\Game\PC版无名杀\noname-1.10.17.4.1\audio
+D:\Game\PC版无名杀\noname-1.10.17.4.1\露头素材（十周年露头）
+D:\Game\PC版无名杀\noname-1.10.17.4.1\卡牌扩充素材【必用】
+D:\Game\PC版无名杀\noname-1.10.17.4.1\势力边框扩充【打抗秦必用】
+D:\Game\PC版无名杀\noname-1.10.17.4.1\docs
+D:\Game\PC版无名杀\noname-1.10.17.4.1\typings
+D:\Game\PC版无名杀\noname-1.10.17.4.1\.workbuddy
