@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: 22
 
-      - name: 下载游戏资源包（来自 Release: game-data）
+      - name: "下载游戏资源包（来自 Release: game-data）"
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
